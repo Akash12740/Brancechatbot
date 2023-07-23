@@ -1,0 +1,53 @@
+# Required Libraries
+from transformers import pipeline
+
+# Knowledge Document (Sample Data)
+knowledge_document = """
+In computer science, artificial intelligence (AI), sometimes called machine intelligence, 
+is intelligence demonstrated by machines, in contrast to the natural intelligence displayed 
+by humans and animals. Leading AI textbooks define the field as the study of "intelligent agents": 
+any device that perceives its environment and takes actions that maximize its chance of successfully 
+achieving its goals. Colloquially, the term "artificial intelligence" is often used to describe 
+machines that mimic "cognitive" functions that humans associate with the human mind, 
+such as "learning" and "problem-solving".
+"""
+
+# Retrieval Phase
+def retrieve_context(question, knowledge_doc):
+    # Implement retrieval methods (e.g., TF-IDF, BM25, or DPR) to find relevant context
+    # For simplicity, let's use basic string matching to find relevant context
+    context = ""
+    for line in knowledge_doc.split("\n"):
+        if question.lower() in line.lower():
+            context += line + "\n"
+    return context.strip()
+
+# Generation Phase (LLM)
+def generate_answer(question, context):
+    # Use LLM orchestrator (e.g., Langchain) to generate a personalized answer
+    # For simplicity, let's use a pipeline from the transformers library to generate the answer
+    generator = pipeline(task="text-generation", model="EleutherAI/gpt-neo-2.7B")
+    answer = generator(context + "\nQuestion: " + question)[0]['generated_text']
+    return answer.split("Answer: ")[-1].strip()
+
+# Main Function
+def main():
+    print("Welcome to the Chatbot! Type 'exit' to end the conversation.")
+    while True:
+        user_input = input("User: ")
+        if user_input.lower() == "exit":
+            print("Chatbot: Goodbye! Have a great day!")
+            break
+        else:
+            # Retrieval Phase
+            context = retrieve_context(user_input, knowledge_document)
+            
+            # Generation Phase
+            if context:
+                answer = generate_answer(user_input, context)
+                print("Chatbot:", answer)
+            else:
+                print("Chatbot: I'm sorry, I don't have enough information to answer your question.")
+
+if __name__ == "__main__":
+    main()
